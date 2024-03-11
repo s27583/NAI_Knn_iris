@@ -7,8 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 
-
-
 with open("plik_tekst.txt", "r") as plik:   # wczytanie i dostosowanie danych treningowych
     train = plik.readlines()
 
