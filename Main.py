@@ -1,11 +1,29 @@
-import numpy as np
-import pandas as pd
-import sns
-import statsmodels
-from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
+import math
+
+
+def euclidean_distance(point1, point2):
+    distance = 0
+    for i in range(len(point1)):
+        distance += (point1[i] - point2[i]) ** 2
+    return math.sqrt(distance)
+
+
+def k_nearest_neighbors(train_data, test_data, k):
+    pred_list = []
+    for test_point in test_data:
+        dist_list = []
+        for train_point in train_data:
+            distance = euclidean_distance(test_point[:-1], train_point[:-1])  # obliczanie odleglosci poza labelami
+            dist_list.append((train_point, distance))
+
+        dist_list.sort(key=lambda x: x[1])                                    # sortowanie wg ogleglosci
+        neighbors = dist_list[:k]                                             # wybieranie pierwszych k elementow
+        neighbor_labels = [neighbor[0][-1] for neighbor in neighbors]         # labele najblizszych sasiadow
+        prediction = max(set(neighbor_labels), key=neighbor_labels.count)     # maksymalna wartosc
+        pred_list.append(prediction)
+
+    return pred_list
+
 
 
 with open("plik_tekst.txt", "r") as plik:   # wczytanie i dostosowanie danych treningowych
@@ -47,27 +65,27 @@ for i in test_data:
         i[j] = float(i[j])
 
 
-train_data = np.array(train_data)
-test_data = np.array(test_data)
 
-X_train, y_train = train_data[:, :-1], train_data[:, -1]
-X_test, y_test = test_data[:, :-1], test_data[:, -1]
+pred = k_nearest_neighbors(train_data, test_data, 3)
 
+# Obliczenie dokładności
+correct_labels = [test_point[-1] for test_point in test_data]
+accuracy = sum(1 for pred, label in zip(pred, correct_labels) if pred == label) / len(correct_labels)
 
-knn_classifier = KNeighborsClassifier(n_neighbors=3)
+print("Accuracy:", accuracy)
 
-knn_classifier.fit(X_train, y_train)
+# train_data = np.array(train_data)
+# test_data = np.array(test_data)
+#
+# X_train, y_train = train_data[:, :-1], train_data[:, -1]
+# X_test, y_test = test_data[:, :-1], test_data[:, -1]
+#
+#
+# knn_classifier = KNeighborsClassifier(n_neighbors=3)
+#
+# knn_classifier.fit(X_train, y_train)
+#
+# y_pred = knn_classifier.predict(X_test)
+#
+# acc = accuracy_score(y_test, y_pred)
 
-y_pred = knn_classifier.predict(X_test)
-
-acc ="Accuracy: {:.10f}".format(accuracy_score(y_test, y_pred))
-
-df = pd.DataFrame(test_data, columns=["1", "2", "3", "4", "5"]) # do wpisania ktore kolumny to ktore
-
-# Załóżmy, że etykiety klas są zakodowane w kolumnie `y_train`
-df_train = pd.DataFrame(X_train, columns=df.columns[:-1])
-df_train['Klasa'] = y_train
-
-# Wyświetl wykres z kolorowaniem według etykiet klas
-df_train.plot.scatter(x=df_train.columns[1], y=df_train.columns[4], c='Klasa', title='Wykres danych treningowych z kolorowaniem', colormap='viridis')
-plt.show()
