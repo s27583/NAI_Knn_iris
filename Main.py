@@ -1,5 +1,7 @@
 import math
 
+from sklearn.metrics import accuracy_score
+
 
 def euclidean_distance(point1, point2):
     distance = 0
@@ -8,7 +10,8 @@ def euclidean_distance(point1, point2):
     return math.sqrt(distance)
 
 
-def k_nearest_neighbors(train_data, test_data, k):
+
+def knn(train_data, test_data, k):
     pred_list = []
     for test_point in test_data:
         dist_list = []
@@ -65,27 +68,44 @@ for i in test_data:
         i[j] = float(i[j])
 
 
+pred = knn(train_data, test_data, 3)
 
-pred = k_nearest_neighbors(train_data, test_data, 3)
+true_labels = [float(row[-1]) for row in test_data]  # rzeczywiste etykiety
+accuracy = accuracy_score(true_labels, pred)         # obliczenie dokladnosci
+print("dokladnosc z danymi testowymi z pliku testowego:", accuracy)
 
-# Obliczenie dokładności
-correct_labels = [test_point[-1] for test_point in test_data]
-accuracy = sum(1 for pred, label in zip(pred, correct_labels) if pred == label) / len(correct_labels)
 
-print("Accuracy:", accuracy)
+# Dane testowe
 
+
+train_len = len(train_data)
+test_from_train = int(0.1 * train_len)
+
+for i in range(train_len - test_from_train, train_len - 1):
+    test_data[i - train_len] = train_data[i]
+
+
+pred = knn(train_data, test_data, 3)
+
+true_labels = [float(row[-1]) for row in test_data]  # rzeczywiste etykiety
+accuracy = accuracy_score(true_labels, pred)         # obliczenie dokladnosci
+print("dokladnosc z danymi testowymi z pliku treningowego:", accuracy)
+
+
+
+# import numpy as np
+# from sklearn.model_selection import train_test_split
+# from sklearn.neighbors import KNeighborsClassifier
+#
 # train_data = np.array(train_data)
-# test_data = np.array(test_data)
 #
-# X_train, y_train = train_data[:, :-1], train_data[:, -1]
-# X_test, y_test = test_data[:, :-1], test_data[:, -1]
+# X = train_data[:, :-1]
+# y = train_data[:, -1]
 #
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 #
 # knn_classifier = KNeighborsClassifier(n_neighbors=3)
-#
 # knn_classifier.fit(X_train, y_train)
 #
 # y_pred = knn_classifier.predict(X_test)
-#
-# acc = accuracy_score(y_test, y_pred)
-
+# print("dokladnosc:", accuracy_score(y_test, y_pred))
