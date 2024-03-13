@@ -84,6 +84,8 @@ test_from_train = int(0.1 * train_len)
 for i in range(train_len - test_from_train, train_len - 1):
     test_data[i - train_len] = train_data[i]
 
+    
+
 
 pred = knn(train_data, test_data, 3)
 
